@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            background-color: rgba(204, 157, 184, 0.76);
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center; 
+        }
+        h1{
+            text-align: center;
+            font-size: 2.5rem; /* Diminui de 3rem */
+            text-shadow: 2px 2px 4px rgb(167, 12, 154);
+            margin: 2rem; /* Diminui de 2.5rem */
+        }
+        h2{
+            font-size: 1.25rem; /* Diminui de 1.5rem */
+            margin-top: 30px; /* Diminui de 40px */
+            margin-bottom: 15px; /* Diminui de 20px */
+            text-align: center;
+            color: rgb(85, 22, 104);
+        }
+        .content{
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            box-shadow: 0 0px 10px rgb(62, 4, 80);
+            padding: 1.5rem; /* Diminui de 2rem */
+            border-radius: 15px;
+            gap: 15px; /* Diminui de 20px */
+            width: 79%;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        .content label{
+            font-size: 18px; /* Diminui de 20px */
+            font-weight: bold;
+        }
+        .inputs{
+            border: none;
+            padding: 10px 10px; /* Diminui de 12px 12px */
+            border-radius: 5px;
+            background-color: #ffffff;
+            font-size: 18px; /* Diminui de 20px */
+        }
+        #botao_cadastrar{
+            margin-top: 10px;
+            border: none;
+            outline: none;
+            padding: 10px; /* Diminui de 12px */
+            background-color: rgb(62, 4, 80);
+            color: white;
+            font-size: 1.1rem; /* Diminui de 1.3rem */
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        /* TABELAS */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 2px solid #ffffff;
+            padding: 6px; /* Diminui de 8px */
+            text-align: left;
+        }
+        th { /* CABEÇALHO*/
+            background-color: rgb(62, 4, 80);
+            color: #ffffff;
+            font-size: 18px;
+        }
+        td{ /* CORPO */
+            height: 2rem;
+            overflow: auto; /*Scroll é na página para rolagem quando necessário*/
+            font-size: 16px;
+        }
+        .botoesOK, .botoesX{
+            width: 100%;
+            font-size: 12px; /* Diminui de 14px */
+            font-weight: bold;
+            padding: 2px;
+            border-radius: 5px;
+        }
+        .botoesOK{
+            background-color: rgb(104, 228, 104);
+            border: 1px solid rgb(0, 49, 0);
+            outline: none;
+            cursor: pointer;
+        }
+        .botoesX{
+            background-color: rgb(221, 61, 61);
+            border: 1px solid rgb(83, 0, 0);
+            outline: none;
+            cursor: pointer;
+        }
+    </style>
+    <title>Dona Kota</title>
+</head>
+<body>
+    <div class="content">
+        <h1>DONA KOTA</h1>
+        <label for="nome_cliente">Nome do Cliente:</label>
+        <input type="text" id="nome_cliente" class="inputs">
+        <label for="nome_produto">Nome do Produto:</label>
+        <input type="text" id="nome_produto" class="inputs">
+        <label for="material_cor">Material / Cor:</label>
+        <input type="text" id="material_cor" class="inputs">
+        <label for="valor">Valor da Encomenda (R$):</label>
+        <input type="number" step="0.01" id="valor" class="inputs">
+        <label for="data">Data: </label>
+        <input type="date" id="data" class="inputs">
+        <fieldset id="status">
+            <legend>Status:</legend>
+            <input type="radio" id="a_receber" name="status" value="A receber" checked>
+            <label for="a_receber">A receber</label>
+
+            <input type="radio" id="pre_venda" name="status" value="Pré-venda">
+            <label for="pre_venda">Pré-venda</label>
+
+            <input type="radio" id="pago" name="status" value="Pago">
+            <label for="pago">Pago</label>
+        </fieldset>
+        <button id="botao_cadastrar" onclick="cadastrarEncomenda()">Cadastrar Encomenda</button>
+    
+        <div class="tabela1" >
+            <h2>Lista de Produção</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Produto</th>
+                        <th>Material / Cor</th>
+                        <th>Data</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela1">
+                </tbody>
+            </table>
+        </div>
+        <div class="tabela2">
+            <h2>Concluídos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Produto</th>
+                        <th>Material / Cor</th>
+                        <th>Data</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela2">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Carrega as tabelas do localStorage
+            carregarTabelas();
+        });
+
+        function carregarTabelas() {
+            let listaProducao = JSON.parse(localStorage.getItem('listaProducao')) || [];
+            let concluidos = JSON.parse(localStorage.getItem('concluidos')) || [];
+            
+            // Ordena as listas por data crescente
+            listaProducao.sort((a, b) => new Date(a.data) - new Date(b.data));
+            concluidos.sort((a, b) => new Date(a.data) - new Date(b.data));
+            
+            listaProducao.forEach(item => adicionarLinhaTabela(item, 'corpoTabela1'));
+            concluidos.forEach(item => adicionarLinhaTabela(item, 'corpoTabela2'));
+        }
+
+        function salvarTabelas() {
+            let listaProducao = [];
+            let concluidos = [];
+
+            document.querySelectorAll('#corpoTabela1 tr').forEach(tr => {
+                let cliente = tr.cells[0].innerText;
+                let produto = tr.cells[1].innerText;
+                let materialCor = tr.cells[2].innerText;
+                let data = tr.cells[3].innerText;
+                let valor = tr.cells[4].innerText.replace('R$ ', '').replace(',', '.');
+                let status = tr.cells[5].querySelector('input[type="radio"]:checked').value;
+                listaProducao.push({ cliente, produto, materialCor, data, valor, status });
+            });
+
+            document.querySelectorAll('#corpoTabela2 tr').forEach(tr => {
+                let cliente = tr.cells[0].innerText;
+                let produto = tr.cells[1].innerText;
+                let materialCor = tr.cells[2].innerText;
+                let data = tr.cells[3].innerText;
+                let valor = tr.cells[4].innerText.replace('R$ ', '').replace(',', '.');
+                let status = tr.cells[5].querySelector('input[type="radio"]:checked').value;
+                concluidos.push({ cliente, produto, materialCor, data, valor, status });
+            });
+
+            localStorage.setItem('listaProducao', JSON.stringify(listaProducao));
+            localStorage.setItem('concluidos', JSON.stringify(concluidos));
+        }
+
+        function adicionarLinhaTabela(item, tabelaId) {
+            let tabela = document.getElementById(tabelaId);
+            let novaLinha = criarLinha(item, tabelaId); // Passamos tabelaId para a função criarLinha
+
+            // Insere a linha na posição correta com base na data
+            let rows = tabela.getElementsByTagName('tr');
+            let inserted = false;
+
+            for (let i = 0; i < rows.length; i++) {
+                let rowData = rows[i].getElementsByTagName('td');
+                let rowDataDate = new Date(rowData[3].innerText); // Considerando que a data está na 4ª coluna
+
+                if (new Date(item.data) < rowDataDate) {
+                    tabela.insertBefore(novaLinha, rows[i]);
+                    inserted = true;
+                    break;
+                }
+            }
+
+            if (!inserted) {
+                tabela.appendChild(novaLinha);
+            }
+        }
+
+        function criarLinha(item, tabelaId) {
+            let tabela = document.getElementById(tabelaId); // Adicionamos essa linha para pegar a tabela correta
+            let linha = document.createElement('tr');
+
+            let celula1 = document.createElement('td');
+            celula1.textContent = item.cliente;
+
+            let celula2 = document.createElement('td');
+            celula2.textContent = item.produto;
+
+            let celula3 = document.createElement('td');
+            celula3.textContent = item.materialCor;
+
+            let celula4 = document.createElement('td');
+            celula4.textContent = item.data;
+
+            let celula5 = document.createElement('td');
+            let valorFormatado = item.valor.replace('.', ',');
+            celula5.textContent = `R$ ${valorFormatado}`;
+
+            let celula6 = document.createElement('td');
+            celula6.innerHTML = `
+                <input type="radio" name="status_${tabelaId}_${tabela.getElementsByTagName('tr').length + 1}" value="A receber" ${item.status === 'A receber' ? 'checked' : ''}> A receber
+                <input type="radio" name="status_${tabelaId}_${tabela.getElementsByTagName('tr').length + 1}" value="Pré-venda" ${item.status === 'Pré-venda' ? 'checked' : ''}> Pré-venda
+                <input type="radio" name="status_${tabelaId}_${tabela.getElementsByTagName('tr').length + 1}" value="Pago" ${item.status === 'Pago' ? 'checked' : ''}> Pago
+            `;
+
+            // Adiciona event listeners para os inputs de rádio
+            celula6.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', salvarTabelas);
+            });
+
+            let celula7 = document.createElement('td');
+            let botaoOK = document.createElement('button');
+            botaoOK.innerHTML = 'OK';
+            botaoOK.className = 'botoesOK';
+
+            botaoOK.addEventListener('click', function() {
+                tabela.removeChild(linha);
+                document.getElementById('corpoTabela2').appendChild(linha);
+                celula7.removeChild(botaoOK);
+                salvarTabelas(); // Atualiza o localStorage
+            });
+
+            let botaoX = document.createElement('button');
+            botaoX.innerHTML = 'XXX';
+            botaoX.className = 'botoesX';
+
+            botaoX.addEventListener('click', function() {
+                linha.remove(); // Remove a linha da tabela visualmente
+                salvarTabelas(); // Atualiza o localStorage
+            });
+
+            celula7.appendChild(botaoOK);
+            celula7.appendChild(botaoX);
+
+            linha.appendChild(celula1);
+            linha.appendChild(celula2);
+            linha.appendChild(celula3);
+            linha.appendChild(celula4);
+            linha.appendChild(celula5);
+            linha.appendChild(celula6);
+            linha.appendChild(celula7);
+
+            return linha;
+        }
+
+        function cadastrarEncomenda() {
+            let nomeCliente = document.getElementById('nome_cliente').value.trim();
+            let nomeProduto = document.getElementById('nome_produto').value.trim();
+            let materialCor = document.getElementById('material_cor').value.trim();
+            let valor = document.getElementById('valor').value.trim();
+            let data = document.getElementById('data').value.trim();
+            let status = document.querySelector('input[name="status"]:checked');
+
+            if (!nomeCliente || !nomeProduto || !materialCor || !valor || !data || !status) {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            let encomenda = {
+                cliente: nomeCliente,
+                produto: nomeProduto,
+                materialCor: materialCor,
+                valor: valor,
+                data: data,
+                status: status.value
+            };
+
+            adicionarLinhaTabela(encomenda, 'corpoTabela1');
+            salvarTabelas(); // Atualiza o localStorage
+
+            // Limpa os inputs após cadastrar a encomenda
+            document.getElementById('nome_cliente').value = "";
+            document.getElementById('nome_produto').value = "";
+            document.getElementById('material_cor').value = "";
+            document.getElementById('valor').value = "";
+            document.getElementById('data').value = "";
+
+            // Limpa os botões de rádio após cadastrar a encomenda
+            document.querySelectorAll('input[name="status"]').forEach(radio => {
+                radio.checked = false;
+            });
+        }
+    </script>
+</body>
+</html>
+
